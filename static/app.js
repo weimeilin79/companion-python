@@ -1,12 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const sessionId = Math.random().toString(36).substring(2, 15);
     const textInput = document.getElementById('text-input');
     const sendButton = document.getElementById('send-button');
     const characterImage = document.getElementById('character-image');
     const voiceSelect = document.getElementById('voice-select');
     const status = document.getElementById('status');
 
-    const openMouthImg = '/static/images/char-mouth-open.png';
-    const closedMouthImg = '/static/images/char-mouth-closed.png';
+    const openMouthImg = `/static/images/char-mouth-open.png?v=${sessionId}`;
+    const closedMouthImg = `/static/images/char-mouth-closed.png?v=${sessionId}`;
+
+    // Apply cache-busted source immediately and preload images
+    characterImage.src = closedMouthImg;
+    const preloadOpen = new Image();
+    preloadOpen.src = openMouthImg;
+    const preloadClosed = new Image();
+    preloadClosed.src = closedMouthImg;
 
     let voices = [];
     let lipSyncInterval;
@@ -122,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message: message }),
+                body: JSON.stringify({ message: message, session_id: sessionId }),
             });
 
             if (!response.ok) {

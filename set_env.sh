@@ -72,6 +72,15 @@ echo "Exported GOOGLE_CLOUD_LOCATION=$GOOGLE_CLOUD_LOCATION"
 export REGION="$GOOGLE_CLOUD_LOCATION"
 echo "Exported REGION=$GOOGLE_CLOUD_LOCATION"
 
+# 13. Export GEMINI_API_KEY from ~/gemini_key.txt
+GEMINI_KEY_FILE="~/gemini_key.txt"
+GEMINI_KEY_FILE_PATH=$(eval echo $GEMINI_KEY_FILE)
+if [ -f "$GEMINI_KEY_FILE_PATH" ]; then
+  export GEMINI_API_KEY=$(cat "$GEMINI_KEY_FILE_PATH" | tr -d '\r\n[:space:]')
+  echo "Exported GEMINI_API_KEY from $GEMINI_KEY_FILE"
+else
+  echo "Warning: $GEMINI_KEY_FILE not found. GEMINI_API_KEY was not set."
+fi
 
 source ~/.bashrc
 

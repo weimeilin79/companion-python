@@ -17,9 +17,6 @@ if character_exists:
         app_name="Demo App",
     )
 
-adk_session = None
-session_lock = asyncio.Lock()
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -28,19 +25,21 @@ def index():
 @app.route('/chat', methods=['POST'])
 async def chat():
     user_message = request.json.get('message')
+    session_id = request.json.get('session_id', 'default_session')
 
     if not character_exists:
         return jsonify({'response': user_message})
 
-    global adk_session
+    # Retrieve or create session dynamically
+    adk_session = await runner.session_service.get_session(
+        app_name=runner.app_name, user_id="inapp_user", session_id=session_id
+    )
     if adk_session is None:
-        async with session_lock:
-            if adk_session is None:
-                adk_session = await runner.session_service.create_session(
-                    app_name=runner.app_name, user_id="inapp_user"
-                )
+        adk_session = await runner.session_service.create_session(
+            app_name=runner.app_name, user_id="inapp_user", session_id=session_id
+        )
 
-    content = types.Content(parts=[types.Part(text=user_message)])
+    content = types.Content(role="user", parts=[types.Part(text=user_message)])
     response_text = ""
     async for event in runner.run_async(
         user_id=adk_session.user_id,
